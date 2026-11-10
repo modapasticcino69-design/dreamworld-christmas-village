@@ -232,7 +232,13 @@
       margin: .85rem auto 0;
       border-radius: .35rem;
     }
-    dialog form { margin-top: 1.2rem; }
+    .dialog-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      margin-top: 1.2rem;
+    }
+    .dialog-actions a { text-decoration: none; }
     @media (max-width: 700px) {
       .hero { padding-bottom: 7rem; }
       .moon { top: auto; right: 17%; bottom: 4.75rem; }
@@ -361,7 +367,9 @@
     <h2 id="dialog-title"></h2>
     <p id="dialog-text"></p>
     <div id="dialog-cover"></div>
-    <form method="dialog">
+    <form method="dialog" class="dialog-actions">
+      <a class="action" id="dialog-game" href="https://t.me/DreamworldChristmas2026Bot?start=avvento_01"
+        target="_blank" rel="noopener" hidden>Gioca su Telegram</a>
       <button class="action" autofocus>Chiudi</button>
     </form>
   </dialog>
@@ -464,6 +472,7 @@
     const dialogTitle = document.querySelector("#dialog-title");
     const dialogText = document.querySelector("#dialog-text");
     const dialogCover = document.querySelector("#dialog-cover");
+    const dialogGame = document.querySelector("#dialog-game");
 
     function dateInRome(now = new Date()) {
       const parts = Object.fromEntries(romeDate.formatToParts(now)
@@ -472,10 +481,11 @@
       return parts.year * 10000 + parts.month * 100 + parts.day;
     }
 
-    function showDialog(label, title, description, cover) {
+    function showDialog(label, title, description, cover, showGame = false) {
       dialogLabel.textContent = label;
       dialogTitle.textContent = title;
       dialogText.textContent = description;
+      dialogGame.hidden = !showGame;
       dialogCover.replaceChildren();
       if (cover) {
         const image = document.createElement("img");
@@ -505,7 +515,7 @@
           showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre a mezzanotte, ora di Roma.");
           return;
         }
-        showDialog(dateLabel, cover?.title ?? title, description, cover);
+        showDialog(dateLabel, cover?.title ?? title, description, cover, day === 1);
       });
       item.append(button);
       grid.append(item);
