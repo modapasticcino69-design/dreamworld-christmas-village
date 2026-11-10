@@ -1,1 +1,476 @@
-powershell -NoProfile -Command "Get-Content -Raw -LiteralPath 'C:\Users\Administrator\Documents\ChatGPT\Giochi di Natale su Telegram\index.html' | Set-Clipboard"
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#132e24">
+  <meta name="description" content="Il calendario dell’Avvento 2026 di Dreamworld Christmas Village. Una casella al giorno dal 1° al 24 dicembre.">
+  <title>Dreamworld Christmas Village · Avvento 2026</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --forest: #132e24;
+      --pine: #214536;
+      --red: #742c36;
+      --gold: #f0ce87;
+      --paper: #f8f1e1;
+      --ink: #213b30;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at 50% 0, #294843, #102923 55%, #091d1a);
+      color: var(--paper);
+      font: 1rem/1.55 system-ui, sans-serif;
+    }
+    button { font: inherit; cursor: pointer; }
+    :focus-visible { outline: 3px solid #bd7d25; outline-offset: 4px; }
+    h1, h2, p { margin: 0; }
+    h1, h2, .number { font-family: Georgia, serif; }
+    .eyebrow {
+      font-size: .73rem;
+      font-weight: 750;
+      letter-spacing: .19em;
+      text-transform: uppercase;
+    }
+    .hero {
+      text-align: center;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: 2.75rem 1rem 5rem;
+      border-top: 3px solid #ad824e;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      z-index: -3;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 35%, #6d506956, transparent 43%),
+        radial-gradient(ellipse at 78% 5%, #76a89b38, transparent 44%);
+      pointer-events: none;
+    }
+    .hero .eyebrow { color: var(--gold); }
+    .ornament {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .7rem;
+      color: var(--gold);
+      margin: .75rem 0 .6rem;
+      font-size: 1.4rem;
+    }
+    .ornament::before, .ornament::after {
+      content: "";
+      width: 2.5rem;
+      border-top: 1px solid currentColor;
+    }
+    h1 { font-size: clamp(2.65rem, 7vw, 5rem); font-weight: 400; line-height: .99; }
+    h1 em { display: block; color: var(--gold); font-weight: 400; }
+    .hero p:last-of-type { margin-top: 1.25rem; }
+    .snow-sky {
+      position: absolute;
+      z-index: -2;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      color: var(--gold);
+      pointer-events: none;
+    }
+    .moon {
+      position: absolute;
+      z-index: -1;
+      top: 2.4rem;
+      right: max(2.1rem, calc(50% - 29rem));
+      width: clamp(2.2rem, 6vw, 4.85rem);
+      height: auto;
+      color: var(--gold);
+      filter: drop-shadow(0 0 .75rem #ffd88f6b);
+      pointer-events: none;
+    }
+    .snow-scene {
+      position: absolute;
+      z-index: -1;
+      inset: auto 0 0;
+      width: 100%;
+      height: 13rem;
+      pointer-events: none;
+    }
+    .snowman {
+      position: absolute;
+      z-index: -1;
+      bottom: .95rem;
+      width: clamp(5.25rem, 12vw, 9.75rem);
+      height: auto;
+      color: #8c323e;
+      filter: drop-shadow(0 .35rem .3rem #0d211e45);
+      pointer-events: none;
+    }
+    .snowman-left { left: max(1.75rem, calc(50% - 34rem)); transform: rotate(-7deg); }
+    .snowman-right { right: max(1.75rem, calc(50% - 34rem)); color: #285d46; transform: rotate(7deg); }
+    main { width: min(100% - 2rem, 64rem); margin-inline: auto; }
+    .calendar {
+      position: relative;
+      background: linear-gradient(160deg, #214638, #152f27 75%);
+      border: 1px solid #f0ce877d;
+      border-radius: 1rem;
+      box-shadow: 0 1rem 2rem #081b1260;
+      padding: clamp(1rem, 4vw, 2.4rem);
+    }
+    .calendar::before {
+      content: "";
+      position: absolute;
+      inset: .35rem;
+      border: 1px solid #f0ce8733;
+      border-radius: .72rem;
+      pointer-events: none;
+    }
+    .calendar-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: .65rem 1.5rem;
+      margin-bottom: 1.15rem;
+    }
+    .calendar-header .eyebrow { color: var(--gold); }
+    .calendar-header .eyebrow::before { content: "✦"; margin-right: .5rem; }
+    .dialog-label { color: var(--red); }
+    h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 400; line-height: 1.15; }
+    #calendar-status { margin-top: .4rem; }
+    .grid {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: clamp(.75rem, 2vw, 1.15rem) clamp(.45rem, 1.3vw, .85rem);
+    }
+    .door {
+      position: relative;
+      width: 100%;
+      min-height: 7.6rem;
+      padding: 1.85rem .25rem .55rem;
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: .1rem;
+      background: linear-gradient(145deg, #3a6853, var(--pine));
+      color: var(--paper);
+      border: 1px solid #f0ce8782;
+      border-radius: .35rem .35rem .6rem .6rem;
+      background-clip: padding-box;
+      box-shadow: 0 .23rem 0 #0b211c;
+      transition: transform .16s ease, box-shadow .16s ease;
+    }
+    li:nth-child(even) .door { background: linear-gradient(145deg, #824250, #592833); }
+    .door::before {
+      content: "";
+      position: absolute;
+      inset: -1px -1px auto;
+      height: 1.55rem;
+      clip-path: polygon(0 76%, 50% 0, 100% 76%, 100% 94%, 90% 98%, 77% 94%, 64% 100%, 50% 95%, 33% 100%, 17% 94%, 0 99%);
+      background: linear-gradient(#fffdf3 48%, #d3e7e6);
+      pointer-events: none;
+    }
+    .door::after {
+      content: "";
+      position: absolute;
+      inset: 1.7rem .36rem .27rem;
+      border: 1px solid #f0ce875c;
+      border-radius: 48% 48% .25rem .25rem / 31% 31% .25rem .25rem;
+      pointer-events: none;
+    }
+    .door:hover { transform: translateY(-2px); box-shadow: 0 .32rem .6rem #233a3035; }
+    .door[data-state="available"] { box-shadow: inset 0 0 0 2px #e8c37a; }
+    .door[data-state="available"] .symbol { filter: drop-shadow(0 0 .32rem #ffdd87); }
+    .door[aria-current="date"] { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .calendar :focus-visible { outline: 3px solid #fff3cb; outline-offset: 4px; }
+    .symbol { width: 1rem; height: 1rem; color: var(--gold); }
+    .number { font-size: clamp(1.6rem, 4.5vw, 2.15rem); line-height: 1.1; }
+    .door-state { font-size: .68rem; font-weight: 650; }
+    .info {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem 2rem;
+      margin-top: 1.4rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid #f0ce8766;
+    }
+    .info p { max-width: 40ch; margin-top: .25rem; }
+    .action {
+      border-radius: .35rem;
+      border: 1px solid var(--red);
+      background: var(--red);
+      color: var(--paper);
+      padding: .55rem .9rem;
+      font-weight: 650;
+    }
+    .action:hover { background: #56212a; }
+    .calendar .action { border-color: #f0ce8782; }
+    footer { text-align: center; color: var(--gold); font-size: .82rem; padding: 1.5rem 1rem 2rem; }
+    dialog {
+      width: min(29rem, 100% - 2rem);
+      max-height: calc(100% - 2rem);
+      padding: clamp(1.25rem, 5vw, 2rem);
+      color: var(--ink);
+      background: var(--paper);
+      border: 2px solid #ba9558;
+      border-radius: .8rem;
+    }
+    dialog::backdrop { background: #091c15c9; }
+    dialog h2 { margin: .35rem 0 .7rem; }
+    dialog form { margin-top: 1.2rem; }
+    @media (max-width: 700px) {
+      .hero { padding-bottom: 7rem; }
+      .moon { top: auto; right: 17%; bottom: 4.75rem; }
+      .snowman { width: 5.5rem; bottom: .55rem; }
+      .snowman-left { left: 1.25rem; }
+      .snowman-right { right: 1.25rem; }
+      .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    @media (max-width: 390px) {
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .door { min-height: 6.5rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .door { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" style="position:absolute">
+    <symbol id="lock" viewBox="0 0 24 24">
+      <rect x="6" y="10" width="12" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      <path d="M9 10V7a3 3 0 0 1 6 0v3m-3 4v2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="star" viewBox="0 0 24 24">
+      <path d="M12 2l2.8 6.4 7 .7-5.2 4.7 1.5 6.9-6.1-3.6-6.1 3.6 1.5-6.9-5.2-4.7 7-.7z" fill="currentColor"/>
+    </symbol>
+    <symbol id="tree" viewBox="0 0 80 145">
+      <path d="M40 0L20 43h10L12 77h14L0 123h34v22h12v-22h34L54 77h14L50 43h10z" fill="currentColor"/>
+      <path d="M40 0 26 31l12-4 6 6 10-2zm-18 54-6 16 18-4 7 7 22-4-8-13zm-8 39L4 115l21-5 15 5 14-5 22 5-10-22-11 7-14-3-15 4z" fill="#d8ebe6" opacity=".8"/>
+    </symbol>
+    <symbol id="sparkle" viewBox="0 0 20 20">
+      <path d="M10 0q1 9 10 10-9 1-10 10Q9 11 0 10 9 9 10 0Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="snow-person" viewBox="0 0 140 165">
+      <ellipse cx="71" cy="151" rx="56" ry="10" fill="#93b9b3" opacity=".46"/>
+      <path d="m38 116-23-19-9 2m9-2-2-9m88 27 22-21 9-1m-9 1 3-9" fill="none" stroke="#805e43" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="71" cy="119" rx="39" ry="33" fill="#e4efed"/>
+      <ellipse cx="67" cy="115" rx="32" ry="28" fill="#fffaf1"/>
+      <circle cx="71" cy="71" r="28" fill="#e4efed"/>
+      <circle cx="68" cy="68" r="24" fill="#fffaf1"/>
+      <path d="m51 46 1-24q1-4 5-4l29 1q4 0 4 4l1 22z" fill="#183931"/>
+      <path d="m52 38 38-1 1 9-40 1z" fill="currentColor"/>
+      <ellipse cx="71" cy="47" rx="33" ry="5" fill="#183931"/>
+      <g fill="#26423a">
+        <circle cx="62" cy="66" r="2.7"/><circle cx="78" cy="66" r="2.7"/>
+        <circle cx="70" cy="111" r="2.9"/><circle cx="70" cy="126" r="2.9"/>
+      </g>
+      <path d="m70 71 19 4-19 2z" fill="#d67735"/>
+      <path d="M64 81q7 6 14 0" fill="none" stroke="#26423a" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M46 88q23 12 50-1l2 10q-26 14-52 2z" fill="currentColor"/>
+      <path d="m85 97 13-3 9 23-14 4z" fill="currentColor"/>
+      <path d="m91 112 13-4m-12 8 14-4" stroke="#f0ce87" stroke-width="2"/>
+    </symbol>
+  </svg>
+
+  <header class="hero">
+    <svg class="snow-sky" aria-hidden="true">
+      <defs>
+        <pattern id="winter-sky" width="282" height="205" patternUnits="userSpaceOnUse">
+          <g fill="#edf7f0" opacity=".65">
+            <circle cx="15" cy="32" r="1.6"/><circle cx="65" cy="17" r="1.1"/>
+            <circle cx="136" cy="29" r="1.8"/><circle cx="240" cy="20" r="1.2"/>
+            <circle cx="99" cy="75" r="1"/><circle cx="266" cy="68" r="1.6"/>
+            <circle cx="33" cy="103" r="2"/><circle cx="174" cy="107" r="1.3"/>
+            <circle cx="130" cy="156" r="1.2"/><circle cx="222" cy="141" r="1.9"/>
+            <circle cx="56" cy="172" r="1.3"/><circle cx="273" cy="190" r="1.2"/>
+          </g>
+          <use href="#sparkle" x="44" y="47" width="12" height="12" opacity=".75"/>
+          <use href="#sparkle" x="199" y="62" width="17" height="17" opacity=".85"/>
+          <use href="#sparkle" x="86" y="128" width="10" height="10" opacity=".65"/>
+          <use href="#sparkle" x="165" y="174" width="12" height="12" opacity=".8"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#winter-sky)"/>
+    </svg>
+    <svg class="moon" viewBox="0 0 80 80" aria-hidden="true">
+      <path d="M49 5a34 34 0 1 0 24 49A32 32 0 0 1 49 5Z" fill="currentColor"/>
+      <use href="#sparkle" x="56" y="15" width="13" height="13"/>
+      <use href="#sparkle" x="69" y="34" width="7" height="7"/>
+    </svg>
+    <svg class="snow-scene" viewBox="0 0 1200 215" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <g color="#32594b" opacity=".6">
+        <use href="#tree" x="-12" y="19" width="99" height="178"/>
+        <use href="#tree" x="59" y="74" width="73" height="134"/>
+        <use href="#tree" x="138" y="115" width="44" height="81"/>
+        <use href="#tree" x="1040" y="98" width="60" height="110"/>
+        <use href="#tree" x="1090" y="58" width="72" height="135"/>
+        <use href="#tree" x="1131" y="15" width="98" height="179"/>
+      </g>
+      <path d="M0 182q137-23 290 10 190 40 379 4 235-43 531-13v32H0Z" fill="#93b5ac" opacity=".32"/>
+      <path d="M0 198q182-12 336 4 186 20 386 0 253-22 478-5v18H0Z" fill="#c7ded8" opacity=".42"/>
+    </svg>
+    <svg class="snowman snowman-left" viewBox="0 0 140 165" aria-hidden="true"><use href="#snow-person"/></svg>
+    <svg class="snowman snowman-right" viewBox="0 0 140 165" aria-hidden="true"><use href="#snow-person"/></svg>
+    <p class="eyebrow">Calendario dell’Avvento · 2026</p>
+    <div class="ornament" aria-hidden="true">✦</div>
+    <h1>Dreamworld <em>Christmas Village</em></h1>
+    <p>Dal 1° al 24 dicembre, una nuova casella ogni giorno.</p>
+  </header>
+
+  <main>
+    <section class="calendar" aria-labelledby="calendar-title">
+      <div class="calendar-header">
+        <div>
+          <p class="eyebrow">Dicembre 2026</p>
+          <h2 id="calendar-title">Le 24 caselle del villaggio</h2>
+          <p id="calendar-status" role="status"></p>
+        </div>
+      </div>
+      <ol class="grid" id="doors" aria-label="Caselle dal 1° al 24 dicembre 2026"></ol>
+      <noscript><p>Attiva JavaScript nel browser per aprire le caselle del calendario.</p></noscript>
+      <div class="info">
+        <div>
+          <strong>Giochi e classifiche</strong>
+          <p>I giochi e le classifiche del bot Telegram saranno collegati qui in seguito.</p>
+        </div>
+        <button class="action" id="preview" type="button">Prova una casella</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>Dreamworld Christmas Village · Sblocco a mezzanotte, ora di Roma</footer>
+
+  <dialog id="day-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-text">
+    <p class="eyebrow dialog-label" id="dialog-label"></p>
+    <h2 id="dialog-title"></h2>
+    <p id="dialog-text"></p>
+    <form method="dialog">
+      <button class="action" autofocus>Chiudi</button>
+    </form>
+  </dialog>
+
+  <script>
+    const year = 2026;
+    const firstDate = year * 10000 + 1201;
+    const lastDate = year * 10000 + 1224;
+    const romeDate = new Intl.DateTimeFormat("it-IT", {
+      timeZone: "Europe/Rome",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric"
+    });
+    const messages = [
+      ["Si accendono le luci", "Benvenuti al villaggio! Oggi si accendono le prime luci di Natale."],
+      ["Una tazza fumante", "Oggi il villaggio profuma di cioccolata calda e cannella."],
+      ["Il primo fiocco", "Un fiocco di neve si è posato sul tetto della casetta rossa."],
+      ["La letterina", "È il momento di scrivere un desiderio e piegarlo in una busta."],
+      ["La ghirlanda", "Sulla porta della piazza è comparsa una ghirlanda con un gran fiocco rosso."],
+      ["Campanelli nella neve", "In fondo al viale si sente il tintinnio di una slitta."],
+      ["Il forno del villaggio", "Dal forno sono uscite le prime stelline di pan di zenzero."],
+      ["L’albero in piazza", "Manca solo la stella in cima al grande abete."],
+      ["Un nastro d’oro", "Qualcuno ha lasciato un pacchetto con un nastro dorato sulla panchina."],
+      ["La finestra illuminata", "Una candela alla finestra fa compagnia a chi passeggia nel villaggio."],
+      ["Un pupazzo di neve", "Il pupazzo accanto al cancello ha ricevuto una sciarpa verde."],
+      ["La bottega dei regali", "Dalla bottega arrivano il fruscio della carta e il suono delle forbici."],
+      ["La notte delle lanterne", "Le lanterne disegnano un sentiero dorato fino alla piazza."],
+      ["Un canto in piazza", "Il coro del villaggio sta provando il suo canto preferito."],
+      ["La stella cometa", "Guarda in alto. C’è una stella più luminosa delle altre."],
+      ["Il profumo degli agrumi", "Arance e chiodi di garofano profumano il mercatino."],
+      ["La cartolina", "Spedisci un pensiero a una persona che vorresti avere qui."],
+      ["Il sentiero degli abeti", "Tra gli abeti innevati si intravede la luce del villaggio."],
+      ["Il mercatino", "Sulle bancarelle ci sono biscotti, candele e addobbi di legno."],
+      ["La slitta", "La slitta è pronta. Manca ancora una piccola campanella."],
+      ["La sera più lunga", "Le luci del villaggio brillano già mentre il cielo diventa blu."],
+      ["Il fiocco finale", "L’ultimo regalo è incartato e pronto sotto l’albero."],
+      ["Quasi Natale", "Manca poco. Il villaggio si prepara alla notte della Vigilia."],
+      ["Buona Vigilia!", "Le 24 caselle sono aperte. Buon Natale da Dreamworld Christmas Village!"]
+    ];
+
+    const grid = document.querySelector("#doors");
+    const status = document.querySelector("#calendar-status");
+    const dialog = document.querySelector("#day-dialog");
+    const dialogLabel = document.querySelector("#dialog-label");
+    const dialogTitle = document.querySelector("#dialog-title");
+    const dialogText = document.querySelector("#dialog-text");
+
+    function dateInRome(now = new Date()) {
+      const parts = Object.fromEntries(romeDate.formatToParts(now)
+        .filter(part => part.type !== "literal")
+        .map(part => [part.type, Number(part.value)]));
+      return parts.year * 10000 + parts.month * 100 + parts.day;
+    }
+
+    function showDialog(label, title, description) {
+      dialogLabel.textContent = label;
+      dialogTitle.textContent = title;
+      dialogText.textContent = description;
+      dialog.showModal();
+    }
+
+    const doors = messages.map(([title, description], index) => {
+      const day = index + 1;
+      const item = document.createElement("li");
+      const button = document.createElement("button");
+      button.className = "door";
+      button.type = "button";
+      button.setAttribute("aria-haspopup", "dialog");
+      button.innerHTML = '<svg class="symbol" aria-hidden="true"><use></use></svg>' +
+        '<span class="number"></span><span class="door-state"></span>';
+      button.querySelector(".number").textContent = String(day).padStart(2, "0");
+      button.addEventListener("click", () => {
+        const today = dateInRome();
+        refresh(today);
+        const dateLabel = day + " dicembre " + year;
+        if (today < firstDate + index) {
+          showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre a mezzanotte, ora di Roma.");
+          return;
+        }
+        showDialog(dateLabel, title, description);
+      });
+      item.append(button);
+      grid.append(item);
+      return button;
+    });
+
+    let displayedDate;
+    function refresh(today = dateInRome()) {
+      if (today === displayedDate) return;
+      displayedDate = today;
+      const available = today < firstDate ? 0 : Math.min(today, lastDate) - firstDate + 1;
+      status.textContent = available === 0
+        ? "Si comincia il 1° dicembre a mezzanotte, ora di Roma."
+        : available + " di 24 caselle disponibili.";
+
+      doors.forEach((button, index) => {
+        const unlocked = index < available;
+        const current = today === firstDate + index;
+        const label = current ? "Oggi" : unlocked ? "Disponibile" : "Chiusa";
+        button.dataset.state = unlocked ? "available" : "locked";
+        if (current) button.setAttribute("aria-current", "date");
+        else button.removeAttribute("aria-current");
+        button.querySelector("use").setAttribute("href", unlocked ? "#star" : "#lock");
+        button.querySelector(".door-state").textContent = label;
+        button.setAttribute("aria-label", (index + 1) + " dicembre: " + label);
+      });
+    }
+
+    document.querySelector("#preview").addEventListener("click", () => {
+      showDialog("Anteprima · Casella di esempio", "Benvenuti al villaggio!",
+        "Dietro ogni casella ti aspetta un piccolo messaggio di Natale. I giochi e le classifiche del bot Telegram arriveranno in seguito.");
+    });
+
+    refresh();
+    setInterval(() => refresh(), 1000);
+    window.addEventListener("pageshow", () => refresh());
+    document.addEventListener("visibilitychange", () => refresh());
+  </script>
+</body>
+</html>
