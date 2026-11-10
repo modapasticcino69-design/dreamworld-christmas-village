@@ -224,6 +224,14 @@
     }
     dialog::backdrop { background: #091c15c9; }
     dialog h2 { margin: .35rem 0 .7rem; }
+    #dialog-cover img {
+      display: block;
+      max-width: 100%;
+      max-height: 42vh;
+      object-fit: contain;
+      margin: .85rem auto 0;
+      border-radius: .35rem;
+    }
     dialog form { margin-top: 1.2rem; }
     @media (max-width: 700px) {
       .hero { padding-bottom: 7rem; }
@@ -352,6 +360,7 @@
     <p class="eyebrow dialog-label" id="dialog-label"></p>
     <h2 id="dialog-title"></h2>
     <p id="dialog-text"></p>
+    <div id="dialog-cover"></div>
     <form method="dialog">
       <button class="action" autofocus>Chiudi</button>
     </form>
@@ -368,30 +377,84 @@
       day: "numeric"
     });
     const messages = [
-      ["Si accendono le luci", "Benvenuti al villaggio! Oggi si accendono le prime luci di Natale."],
-      ["Una tazza fumante", "Oggi il villaggio profuma di cioccolata calda e cannella."],
-      ["Il primo fiocco", "Un fiocco di neve si è posato sul tetto della casetta rossa."],
-      ["La letterina", "È il momento di scrivere un desiderio e piegarlo in una busta."],
-      ["La ghirlanda", "Sulla porta della piazza è comparsa una ghirlanda con un gran fiocco rosso."],
-      ["Campanelli nella neve", "In fondo al viale si sente il tintinnio di una slitta."],
-      ["Il forno del villaggio", "Dal forno sono uscite le prime stelline di pan di zenzero."],
-      ["L’albero in piazza", "Manca solo la stella in cima al grande abete."],
-      ["Un nastro d’oro", "Qualcuno ha lasciato un pacchetto con un nastro dorato sulla panchina."],
-      ["La finestra illuminata", "Una candela alla finestra fa compagnia a chi passeggia nel villaggio."],
-      ["Un pupazzo di neve", "Il pupazzo accanto al cancello ha ricevuto una sciarpa verde."],
-      ["La bottega dei regali", "Dalla bottega arrivano il fruscio della carta e il suono delle forbici."],
-      ["La notte delle lanterne", "Le lanterne disegnano un sentiero dorato fino alla piazza."],
-      ["Un canto in piazza", "Il coro del villaggio sta provando il suo canto preferito."],
-      ["La stella cometa", "Guarda in alto. C’è una stella più luminosa delle altre."],
-      ["Il profumo degli agrumi", "Arance e chiodi di garofano profumano il mercatino."],
-      ["La cartolina", "Spedisci un pensiero a una persona che vorresti avere qui."],
-      ["Il sentiero degli abeti", "Tra gli abeti innevati si intravede la luce del villaggio."],
-      ["Il mercatino", "Sulle bancarelle ci sono biscotti, candele e addobbi di legno."],
-      ["La slitta", "La slitta è pronta. Manca ancora una piccola campanella."],
-      ["La sera più lunga", "Le luci del villaggio brillano già mentre il cielo diventa blu."],
-      ["Il fiocco finale", "L’ultimo regalo è incartato e pronto sotto l’albero."],
-      ["Quasi Natale", "Manca poco. Il villaggio si prepara alla notte della Vigilia."],
-      ["Buona Vigilia!", "Le 24 caselle sono aperte. Buon Natale da Dreamworld Christmas Village!"]
+      ["Jinx", "La copertina di oggi è dedicata al webtoon di Mingwa.", {
+        src: "./covers/01-jinx.jpg",
+        alt: "Copertina di Jinx di Mingwa, con i due protagonisti in primo piano."
+      }],
+      ["Una tazza fumante", "Oggi il villaggio profuma di cioccolata calda e cannella.", {
+        src: "./covers/02-killing-my-love.jpg", title: "Killing My Love"
+      }],
+      ["Il primo fiocco", "Un fiocco di neve si è posato sul tetto della casetta rossa.", {
+        src: "./covers/03-against.webp", title: "Against All Odds",
+        alt: "Tre personaggi in primo piano, uno in uniforme da poliziotto."
+      }],
+      ["La letterina", "È il momento di scrivere un desiderio e piegarlo in una busta.", {
+        src: "./covers/04-all-for-me.webp", title: "All for Me"
+      }],
+      ["La ghirlanda", "Sulla porta della piazza è comparsa una ghirlanda con un gran fiocco rosso.", {
+        src: "./covers/05-winter-season.webp", title: "Winter Season"
+      }],
+      ["Campanelli nella neve", "In fondo al viale si sente il tintinnio di una slitta.", {
+        src: "./covers/06-the-hell-i-give-you.webp", title: "The Hell I Give You"
+      }],
+      ["Il forno del villaggio", "Dal forno sono uscite le prime stelline di pan di zenzero.", {
+        src: "./covers/07-from-the-burnt-ashes.webp", title: "From the Burnt Ashes"
+      }],
+      ["L’albero in piazza", "Manca solo la stella in cima al grande abete.", {
+        src: "./covers/08-black-swan.webp", title: "Black Swan"
+      }],
+      ["Un nastro d’oro", "Qualcuno ha lasciato un pacchetto con un nastro dorato sulla panchina.", {
+        src: "./covers/09-between-the-lines.webp", title: "Between the Lines"
+      }],
+      ["La finestra illuminata", "Una candela alla finestra fa compagnia a chi passeggia nel villaggio.", {
+        src: "./covers/10-x-sponsor.webp", title: "X Sponsor"
+      }],
+      ["Un pupazzo di neve", "Il pupazzo accanto al cancello ha ricevuto una sciarpa verde.", {
+        src: "./covers/11-honey.webp", title: "Honey Trouble",
+        alt: "Due personaggi, uno biondo e uno dai capelli rossi, su sfondo giallo."
+      }],
+      ["La bottega dei regali", "Dalla bottega arrivano il fruscio della carta e il suono delle forbici.", {
+        src: "./covers/12-one-way-flight.jpg", title: "One-way Flight"
+      }],
+      ["La notte delle lanterne", "Le lanterne disegnano un sentiero dorato fino alla piazza.", {
+        src: "./covers/13-negative-love.webp", title: "Negative Love",
+        alt: "Due personaggi in primo piano, uno con gli occhiali, su sfondo rosa acceso."
+      }],
+      ["Un canto in piazza", "Il coro del villaggio sta provando il suo canto preferito.", {
+        src: "./covers/14-mind-the-gap.jpg", title: "Mind the Gap"
+      }],
+      ["La stella cometa", "Guarda in alto. C’è una stella più luminosa delle altre.", {
+        src: "./covers/15-cover.jpg", title: "Steel Under Silk",
+        alt: "Due personaggi in abiti storici, con rami sullo sfondo."
+      }],
+      ["Il profumo degli agrumi", "Arance e chiodi di garofano profumano il mercatino.", {
+        src: "./covers/16-double-down.jpg", title: "Double Down"
+      }],
+      ["La cartolina", "Spedisci un pensiero a una persona che vorresti avere qui.", {
+        src: "./covers/17-introducing-my-manager.webp", title: "Introducing My Manager"
+      }],
+      ["Il sentiero degli abeti", "Tra gli abeti innevati si intravede la luce del villaggio.", {
+        src: "./covers/18-my-perfect-omega.webp", title: "My Perfect Omega"
+      }],
+      ["Il mercatino", "Sulle bancarelle ci sono biscotti, candele e addobbi di legno.", {
+        src: "./covers/19-rainbow-city.webp", title: "Rainbow City"
+      }],
+      ["La slitta", "La slitta è pronta. Manca ancora una piccola campanella.", {
+        src: "./covers/20-tesoro-of-the-guide.webp", title: "Tesoro of the Guide"
+      }],
+      ["La sera più lunga", "Le luci del villaggio brillano già mentre il cielo diventa blu.", {
+        src: "./covers/21-the-taming.webp", title: "The Taming"
+      }],
+      ["Il fiocco finale", "L’ultimo regalo è incartato e pronto sotto l’albero.", {
+        src: "./covers/22-jugeo-mattanghan-geotdeul.webp", title: "Jugeo Mattanghan Geotdeul"
+      }],
+      ["Quasi Natale", "Manca poco. Il villaggio si prepara alla notte della Vigilia.", {
+        src: "./covers/23-glass-rain.jpeg", title: "Glass Rain"
+      }],
+      ["Buona Vigilia!", "Le 24 caselle sono aperte. Buon Natale da Dreamworld Christmas Village!", {
+        src: "./covers/24-cover.webp", title: "The Boundary of Delusion",
+        alt: "Due personaggi si guardano da vicino, su uno sfondo azzurro."
+      }]
     ];
 
     const grid = document.querySelector("#doors");
@@ -400,6 +463,7 @@
     const dialogLabel = document.querySelector("#dialog-label");
     const dialogTitle = document.querySelector("#dialog-title");
     const dialogText = document.querySelector("#dialog-text");
+    const dialogCover = document.querySelector("#dialog-cover");
 
     function dateInRome(now = new Date()) {
       const parts = Object.fromEntries(romeDate.formatToParts(now)
@@ -408,14 +472,22 @@
       return parts.year * 10000 + parts.month * 100 + parts.day;
     }
 
-    function showDialog(label, title, description) {
+    function showDialog(label, title, description, cover) {
       dialogLabel.textContent = label;
       dialogTitle.textContent = title;
       dialogText.textContent = description;
+      dialogCover.replaceChildren();
+      if (cover) {
+        const image = document.createElement("img");
+        image.alt = cover.alt ?? "Copertina di " + cover.title;
+        image.addEventListener("error", () => image.remove(), { once: true });
+        dialogCover.append(image);
+        image.src = cover.src;
+      }
       dialog.showModal();
     }
 
-    const doors = messages.map(([title, description], index) => {
+    const doors = messages.map(([title, description, cover], index) => {
       const day = index + 1;
       const item = document.createElement("li");
       const button = document.createElement("button");
@@ -433,7 +505,7 @@
           showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre a mezzanotte, ora di Roma.");
           return;
         }
-        showDialog(dateLabel, title, description);
+        showDialog(dateLabel, cover?.title ?? title, description, cover);
       });
       item.append(button);
       grid.append(item);
@@ -464,7 +536,7 @@
 
     document.querySelector("#preview").addEventListener("click", () => {
       showDialog("Anteprima · Casella di esempio", "Benvenuti al villaggio!",
-        "Dietro ogni casella ti aspetta un piccolo messaggio di Natale. I giochi e le classifiche del bot Telegram arriveranno in seguito.");
+        "Apri una casella sbloccata per scoprire la copertina del giorno e un messaggio di Natale. I giochi e le classifiche del bot Telegram arriveranno in seguito.");
     });
 
     refresh();
