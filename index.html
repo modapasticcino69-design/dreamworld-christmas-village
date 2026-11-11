@@ -202,6 +202,7 @@
       border-top: 1px solid #f0ce8766;
     }
     .info p { max-width: 40ch; margin-top: .25rem; }
+    .info a { color: var(--gold); }
     .action {
       border-radius: .35rem;
       border: 1px solid var(--red);
@@ -352,8 +353,8 @@
       <noscript><p>Attiva JavaScript nel browser per aprire le caselle del calendario.</p></noscript>
       <div class="info">
         <div>
-          <strong>Giochi e classifiche</strong>
-          <p>I giochi e le classifiche del bot Telegram saranno collegati qui in seguito.</p>
+          <strong>Giochi e classifica</strong>
+          <p>Ogni indovinello risolto vale 1 punto. Per vedere i punteggi, scrivi <code>/classifica</code> nella chat privata del <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
         </div>
         <button class="action" id="preview" type="button">Prova una casella</button>
       </div>
@@ -552,7 +553,7 @@
 
     document.querySelector("#preview").addEventListener("click", () => {
       showDialog("Anteprima · Casella di esempio", "Benvenuti al villaggio!",
-        "Apri una casella sbloccata per scoprire la copertina del giorno e un messaggio di Natale. I giochi e le classifiche del bot Telegram arriveranno in seguito.");
+        "Apri una casella sbloccata per scoprire la copertina del giorno. Premi Gioca su Telegram per ricevere l’indovinello e provare a guadagnare 1 punto.");
     });
 
     refresh();
