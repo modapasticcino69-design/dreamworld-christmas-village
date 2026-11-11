@@ -354,14 +354,14 @@
       <div class="info">
         <div>
           <strong>Giochi e classifica</strong>
-          <p>Ogni indovinello risolto vale 1 punto. Per vedere i punteggi, scrivi <code>/classifica</code> nella chat privata del <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
+          <p>Ogni indovinello risolto vale 1 punto. Puoi rispondere fino alla fine del 25 dicembre, ora di Roma. Per vedere i punteggi, scrivi <code>/classifica</code> nella chat privata del <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
         </div>
         <button class="action" id="preview" type="button">Prova una casella</button>
       </div>
     </section>
   </main>
 
-  <footer>Dreamworld Christmas Village · Sblocco a mezzanotte, ora di Roma</footer>
+  <footer>Dreamworld Christmas Village · Sblocco alle 18:00, ora di Roma</footer>
 
   <dialog id="day-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-text">
     <p class="eyebrow dialog-label" id="dialog-label"></p>
@@ -378,7 +378,9 @@
   <script>
     const year = 2026;
     const firstDate = year * 10000 + 1201;
-    const lastDate = year * 10000 + 1224;
+    const dayMs = 86400000;
+    const firstOpening = Date.parse("2026-12-01T18:00:00+01:00");
+    const closing = Date.parse("2026-12-26T00:00:00+01:00");
     const romeDate = new Intl.DateTimeFormat("it-IT", {
       timeZone: "Europe/Rome",
       year: "numeric",
@@ -515,32 +517,41 @@
         '<span class="number"></span><span class="door-state"></span>';
       button.querySelector(".number").textContent = String(day).padStart(2, "0");
       button.addEventListener("click", () => {
-        const today = dateInRome();
-        refresh(today);
+        const now = new Date();
+        refresh(now);
         const dateLabel = day + " dicembre " + year;
-        if (today < firstDate + index) {
-          showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre a mezzanotte, ora di Roma.");
+        if (now < firstOpening + index * dayMs) {
+          showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre alle 18:00, ora di Roma.");
           return;
         }
-        showDialog(dateLabel, cover?.title ?? title, description, cover, day);
+        showDialog(dateLabel, cover?.title ?? title, description, cover, now < closing ? day : undefined);
       });
       item.append(button);
       grid.append(item);
       return button;
     });
 
-    let displayedDate;
-    function refresh(today = dateInRome()) {
-      if (today === displayedDate) return;
-      displayedDate = today;
-      const available = today < firstDate ? 0 : Math.min(today, lastDate) - firstDate + 1;
-      status.textContent = available === 0
-        ? "Si comincia il 1° dicembre a mezzanotte, ora di Roma."
-        : available + " di 24 caselle disponibili.";
+    let displayedState;
+    function refresh(now = new Date()) {
+      const today = dateInRome(now);
+      const available = Math.max(0, Math.min(24, Math.floor((now - firstOpening) / dayMs) + 1));
+      const closed = now >= closing;
+      const state = `${today}/${available}/${closed}`;
+      if (state === displayedState) return;
+      displayedState = state;
+      if (closed) {
+        status.textContent = "Il concorso è terminato. Le 24 copertine sono ancora disponibili.";
+        dialogGame.hidden = true;
+        dialogGame.removeAttribute("href");
+      } else {
+        status.textContent = available === 0
+          ? "Si comincia il 1° dicembre alle 18:00, ora di Roma."
+          : available + " di 24 caselle disponibili. Nuove caselle alle 18:00, ora di Roma.";
+      }
 
       doors.forEach((button, index) => {
         const unlocked = index < available;
-        const current = today === firstDate + index;
+        const current = unlocked && today === firstDate + index;
         const label = current ? "Oggi" : unlocked ? "Disponibile" : "Chiusa";
         button.dataset.state = unlocked ? "available" : "locked";
         if (current) button.setAttribute("aria-current", "date");
