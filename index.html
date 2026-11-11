@@ -186,7 +186,7 @@
     .door:hover { transform: translateY(-2px); box-shadow: 0 .32rem .6rem #233a3035; }
     .door[data-state="available"] { box-shadow: inset 0 0 0 2px #e8c37a; }
     .door[data-state="available"] .symbol { filter: drop-shadow(0 0 .32rem #ffdd87); }
-    .door[aria-current="date"] { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .door[aria-current="true"] { outline: 2px solid var(--gold); outline-offset: 2px; }
     .calendar :focus-visible { outline: 3px solid #fff3cb; outline-offset: 4px; }
     .symbol { width: 1rem; height: 1rem; color: var(--gold); }
     .number { font-size: clamp(1.6rem, 4.5vw, 2.15rem); line-height: 1.1; }
@@ -354,7 +354,7 @@
       <div class="info">
         <div>
           <strong>Giochi e classifica</strong>
-          <p>Ogni indovinello risolto vale 1 punto. Puoi rispondere fino alla fine del 25 dicembre, ora di Roma. Per vedere i punteggi, scrivi <code>/classifica</code> nella chat privata del <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
+          <p>Ogni indovinello vale 1 punto e resta giocabile per 24 ore. L’ultimo chiude il 25 dicembre alle 18:00, ora di Roma. Per vedere i punteggi, scrivi <code>/classifica</code> nella chat privata del <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
         </div>
         <button class="action" id="preview" type="button">Prova una casella</button>
       </div>
@@ -377,16 +377,9 @@
 
   <script>
     const year = 2026;
-    const firstDate = year * 10000 + 1201;
     const dayMs = 86400000;
     const firstOpening = Date.parse("2026-12-01T18:00:00+01:00");
-    const closing = Date.parse("2026-12-26T00:00:00+01:00");
-    const romeDate = new Intl.DateTimeFormat("it-IT", {
-      timeZone: "Europe/Rome",
-      year: "numeric",
-      month: "numeric",
-      day: "numeric"
-    });
+    const closing = Date.parse("2026-12-25T18:00:00+01:00");
     const messages = [
       ["Jinx", "La copertina di oggi è dedicata al webtoon di Mingwa.", {
         src: "./covers/01-jinx.jpg",
@@ -477,17 +470,12 @@
     const dialogCover = document.querySelector("#dialog-cover");
     const dialogGame = document.querySelector("#dialog-game");
 
-    function dateInRome(now = new Date()) {
-      const parts = Object.fromEntries(romeDate.formatToParts(now)
-        .filter(part => part.type !== "literal")
-        .map(part => [part.type, Number(part.value)]));
-      return parts.year * 10000 + parts.month * 100 + parts.day;
-    }
-
+    let dialogGameDay;
     function showDialog(label, title, description, cover, gameDay) {
       dialogLabel.textContent = label;
       dialogTitle.textContent = title;
       dialogText.textContent = description;
+      dialogGameDay = gameDay;
       dialogGame.hidden = !gameDay;
       if (gameDay) {
         dialogGame.href = "https://t.me/DreamworldChristmas2026Bot?start=avvento_" +
@@ -524,7 +512,9 @@
           showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre alle 18:00, ora di Roma.");
           return;
         }
-        showDialog(dateLabel, cover?.title ?? title, description, cover, now < closing ? day : undefined);
+        const playable = now < firstOpening + day * dayMs;
+        const details = playable ? description : description + " Il tempo per giocare è scaduto.";
+        showDialog(dateLabel, cover?.title ?? title, details, cover, playable ? day : undefined);
       });
       item.append(button);
       grid.append(item);
@@ -533,28 +523,31 @@
 
     let displayedState;
     function refresh(now = new Date()) {
-      const today = dateInRome(now);
       const available = Math.max(0, Math.min(24, Math.floor((now - firstOpening) / dayMs) + 1));
       const closed = now >= closing;
-      const state = `${today}/${available}/${closed}`;
+      const state = `${available}/${closed}`;
       if (state === displayedState) return;
       displayedState = state;
-      if (closed) {
-        status.textContent = "Il concorso è terminato. Le 24 copertine sono ancora disponibili.";
+      if (dialogGameDay && now >= firstOpening + dialogGameDay * dayMs) {
         dialogGame.hidden = true;
         dialogGame.removeAttribute("href");
+        dialogGameDay = undefined;
+        dialogText.textContent += " Il tempo per giocare è scaduto.";
+      }
+      if (closed) {
+        status.textContent = "Il concorso è terminato. Le 24 copertine sono ancora disponibili.";
       } else {
         status.textContent = available === 0
           ? "Si comincia il 1° dicembre alle 18:00, ora di Roma."
-          : available + " di 24 caselle disponibili. Nuove caselle alle 18:00, ora di Roma.";
+          : `Gioco disponibile nella casella ${String(available).padStart(2, "0")}. Scade il ${available + 1} dicembre alle 18:00, ora di Roma.`;
       }
 
       doors.forEach((button, index) => {
         const unlocked = index < available;
-        const current = unlocked && today === firstDate + index;
-        const label = current ? "Oggi" : unlocked ? "Disponibile" : "Chiusa";
+        const current = !closed && index + 1 === available;
+        const label = current ? "Gioca" : unlocked ? "Copertina" : "Chiusa";
         button.dataset.state = unlocked ? "available" : "locked";
-        if (current) button.setAttribute("aria-current", "date");
+        if (current) button.setAttribute("aria-current", "true");
         else button.removeAttribute("aria-current");
         button.querySelector("use").setAttribute("href", unlocked ? "#star" : "#lock");
         button.querySelector(".door-state").textContent = label;
@@ -564,7 +557,7 @@
 
     document.querySelector("#preview").addEventListener("click", () => {
       showDialog("Anteprima · Casella di esempio", "Benvenuti al villaggio!",
-        "Apri una casella sbloccata per scoprire la copertina del giorno. Premi Gioca su Telegram per ricevere l’indovinello e provare a guadagnare 1 punto.");
+        "Apri una casella sbloccata per scoprire la copertina. Nella casella con il gioco attivo, premi Gioca su Telegram e rispondi entro le 18:00 del giorno successivo.");
     });
 
     refresh();
