@@ -368,7 +368,7 @@
     <p id="dialog-text"></p>
     <div id="dialog-cover"></div>
     <form method="dialog" class="dialog-actions">
-      <a class="action" id="dialog-game" href="https://t.me/DreamworldChristmas2026Bot?start=avvento_01"
+      <a class="action" id="dialog-game"
         target="_blank" rel="noopener" hidden>Gioca su Telegram</a>
       <button class="action" autofocus>Chiudi</button>
     </form>
@@ -481,11 +481,17 @@
       return parts.year * 10000 + parts.month * 100 + parts.day;
     }
 
-    function showDialog(label, title, description, cover, showGame = false) {
+    function showDialog(label, title, description, cover, gameDay) {
       dialogLabel.textContent = label;
       dialogTitle.textContent = title;
       dialogText.textContent = description;
-      dialogGame.hidden = !showGame;
+      dialogGame.hidden = !gameDay;
+      if (gameDay) {
+        dialogGame.href = "https://t.me/DreamworldChristmas2026Bot?start=avvento_" +
+          String(gameDay).padStart(2, "0");
+      } else {
+        dialogGame.removeAttribute("href");
+      }
       dialogCover.replaceChildren();
       if (cover) {
         const image = document.createElement("img");
@@ -515,7 +521,7 @@
           showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre a mezzanotte, ora di Roma.");
           return;
         }
-        showDialog(dateLabel, cover?.title ?? title, description, cover, day === 1);
+        showDialog(dateLabel, cover?.title ?? title, description, cover, day <= 2 ? day : undefined);
       });
       item.append(button);
       grid.append(item);
