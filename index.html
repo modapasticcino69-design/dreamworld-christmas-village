@@ -521,7 +521,7 @@
           showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre a mezzanotte, ora di Roma.");
           return;
         }
-        showDialog(dateLabel, cover?.title ?? title, description, cover, day <= 2 ? day : undefined);
+        showDialog(dateLabel, cover?.title ?? title, description, cover, day);
       });
       item.append(button);
       grid.append(item);
