@@ -240,6 +240,11 @@
       margin-top: 1.2rem;
     }
     .dialog-actions a { text-decoration: none; }
+    #calendar-game { margin-top: 1rem; }
+    #calendar-game .action { margin: .45rem .45rem 0 0; display: inline-block; }
+    #calendar-game a { text-decoration: none; }
+    #game-prompt { white-space: pre-line; }
+    #game-answer { width: 100%; font: inherit; padding: .5rem; margin-top: .45rem; }
     @media (max-width: 700px) {
       .hero { padding-bottom: 7rem; }
       .moon { top: auto; right: 17%; bottom: 4.75rem; }
@@ -354,7 +359,8 @@
       <div class="info">
         <div>
           <strong>Giochi e classifica</strong>
-          <p>Ogni indovinello vale 1 punto e resta giocabile per 24 ore. L’ultimo chiude il 25 dicembre alle 18:00. Per vedere i punteggi, scrivi <code>/classifica</code> nella chat privata del <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
+          <p>Alle 18:00 iniziano quattro minigiochi. Hai 60 secondi per ciascuno dei primi tre, poi 2 minuti per proporre un’idea e 1 minuto per votare. Per vedere i punteggi, scrivi <code>/classifica</code> al <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
+          <button class="action" id="link-telegram" type="button">Collega Telegram</button>
         </div>
         <button class="action" id="preview" type="button">Prova una casella</button>
       </div>
@@ -368,9 +374,22 @@
     <h2 id="dialog-title"></h2>
     <p id="dialog-text"></p>
     <div id="dialog-cover"></div>
+    <section id="calendar-game" aria-label="Minigiochi" hidden>
+      <p id="game-connection" role="status"></p>
+      <a class="action" id="game-link" target="_blank" rel="noopener" hidden>Apri Telegram e premi Avvia</a>
+      <p id="game-timer"></p>
+      <h3 id="game-title" hidden></h3>
+      <p id="game-prompt"></p>
+      <form id="game-form" hidden>
+        <label for="game-answer">La tua risposta</label>
+        <input id="game-answer" maxlength="500" required autocomplete="off">
+        <button class="action" type="submit">Invia</button>
+      </form>
+      <div id="game-votes"></div>
+      <p id="game-feedback" role="status"></p>
+    </section>
     <form method="dialog" class="dialog-actions">
-      <a class="action" id="dialog-game"
-        target="_blank" rel="noopener" hidden>Gioca su Telegram</a>
+      <button class="action" id="dialog-game" type="button" hidden>Apri i minigiochi</button>
       <button class="action" autofocus>Chiudi</button>
     </form>
   </dialog>
@@ -469,20 +488,156 @@
     const dialogText = document.querySelector("#dialog-text");
     const dialogCover = document.querySelector("#dialog-cover");
     const dialogGame = document.querySelector("#dialog-game");
+    const gamePanel = document.querySelector("#calendar-game");
+    const gameConnection = document.querySelector("#game-connection");
+    const gameLink = document.querySelector("#game-link");
+    const gameTitle = document.querySelector("#game-title");
+    const gamePrompt = document.querySelector("#game-prompt");
+    const gameTimer = document.querySelector("#game-timer");
+    const gameForm = document.querySelector("#game-form");
+    const gameAnswer = document.querySelector("#game-answer");
+    const gameVotes = document.querySelector("#game-votes");
+    const gameFeedback = document.querySelector("#game-feedback");
+    const apiRoot = "https://dreamworld-christmas-bot.moda-pasticcino69.workers.dev";
+    let sessionToken;
+    let gameSession;
+    let gameState;
 
+    function browserToken() {
+      if (!sessionToken) {
+        sessionToken = localStorage.getItem("dreamworld-avvento-token") || crypto.randomUUID();
+        localStorage.setItem("dreamworld-avvento-token", sessionToken);
+      }
+      return sessionToken;
+    }
+
+    async function calendarRequest(path, data) {
+      const headers = { Authorization: "Bearer " + browserToken() };
+      if (data) headers["Content-Type"] = "application/json";
+      const response = await fetch(apiRoot + path, {
+        headers, method: data ? "POST" : "GET", body: data ? JSON.stringify(data) : undefined,
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Servizio momentaneamente non disponibile.");
+      return result;
+    }
+
+    function resetGame() {
+      gameSession = undefined;
+      gameState = undefined;
+      gamePanel.hidden = true;
+      gameConnection.textContent = "";
+      gameLink.hidden = true;
+      gameTitle.hidden = true;
+      gamePrompt.textContent = "";
+      gameTimer.textContent = "";
+      gameForm.hidden = true;
+      gameAnswer.value = "";
+      gameVotes.replaceChildren();
+      gameFeedback.textContent = "";
+    }
+
+    async function refreshGame(session) {
+      if (session !== gameSession || session.busy) return;
+      session.busy = true;
+      try {
+        if (!session.linked) {
+          const { linked } = await calendarRequest("/api/session");
+          if (session !== gameSession) return;
+          if (!linked) {
+            const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(browserToken())));
+            if (session !== gameSession) return;
+            const code = btoa(String.fromCharCode(...digest)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+            gameLink.href = "https://t.me/DreamworldChristmas2026Bot?start=web_" + code;
+            gameLink.hidden = false;
+            gameConnection.textContent = "Collega il tuo account per registrare i punti. Dopo aver premuto Avvia, torna qui.";
+            return;
+          }
+          session.linked = true;
+          gameLink.hidden = true;
+          gameConnection.textContent = "Account Telegram collegato.";
+        }
+        if (!session.day) return;
+        const state = await calendarRequest("/api/games/" + session.day);
+        if (session !== gameSession) return;
+        gameTimer.textContent = state.phase === "playing"
+          ? "Tempo rimasto: " + Math.max(0, Math.ceil((state.deadline - state.now) / 1000)) + " s" : "";
+        const changed = !gameState || state.phase !== gameState.phase || state.round !== gameState.round ||
+          state.submitted !== gameState.submitted;
+        if (state.round !== gameState?.round) {
+          gameAnswer.value = "";
+          gameFeedback.textContent = "";
+        }
+        gameState = state;
+        if (!changed) return;
+        gameVotes.replaceChildren();
+        gameTitle.hidden = state.phase !== "playing";
+        gameTitle.textContent = state.title ?? "";
+        gamePrompt.textContent = state.phase === "finished" ? "I minigiochi di questa casella sono terminati."
+          : state.phase === "locked" ? "I minigiochi si aprono alle 18:00." : state.prompt ?? "";
+        gameForm.hidden = state.phase !== "playing" || state.round === 5 || state.submitted;
+        if (state.round === 5 && !state.submitted) {
+          for (const proposal of state.proposals) {
+            const vote = document.createElement("button");
+            vote.type = "button";
+            vote.className = "action";
+            vote.textContent = "🎄 " + proposal.text;
+            vote.disabled = Boolean(proposal.own);
+            vote.addEventListener("click", () => submitGame({ proposalId: proposal.id }));
+            gameVotes.append(vote);
+          }
+          if (!state.proposals.length) gamePrompt.textContent = "Nessuna proposta da votare.";
+        }
+      } catch (error) {
+        if (session === gameSession) gameFeedback.textContent = error.message;
+      } finally {
+        session.busy = false;
+      }
+    }
+
+    async function submitGame(data) {
+      const session = gameSession;
+      const state = gameState;
+      if (!session?.day || !state?.round || session.sending) return;
+      session.sending = true;
+      try {
+        const result = await calendarRequest("/api/games/" + session.day, { ...data, round: state.round });
+        if (session === gameSession) gameFeedback.textContent = result.message;
+      } catch (error) {
+        if (session === gameSession) gameFeedback.textContent = error.message;
+      } finally {
+        session.sending = false;
+        refreshGame(session);
+      }
+    }
+
+    function openGame(day) {
+      resetGame();
+      gamePanel.hidden = false;
+      gameConnection.textContent = "Verifica del collegamento…";
+      gameSession = { day };
+      refreshGame(gameSession);
+    }
+
+    document.querySelector("#link-telegram").addEventListener("click", () => {
+      showDialog("Giochi", "Collega Telegram", "Puoi collegare il tuo account prima dell’apertura.");
+      openGame();
+    });
+    dialogGame.addEventListener("click", () => openGame(dialogGameDay));
+    gameForm.addEventListener("submit", event => {
+      event.preventDefault();
+      submitGame({ answer: gameAnswer.value });
+    });
+    dialog.addEventListener("close", resetGame);
+    setInterval(() => { if (gameSession) refreshGame(gameSession); }, 1500);
     let dialogGameDay;
     function showDialog(label, title, description, cover, gameDay) {
       dialogLabel.textContent = label;
       dialogTitle.textContent = title;
       dialogText.textContent = description;
+      resetGame();
       dialogGameDay = gameDay;
       dialogGame.hidden = !gameDay;
-      if (gameDay) {
-        dialogGame.href = "https://t.me/DreamworldChristmas2026Bot?start=avvento_" +
-          String(gameDay).padStart(2, "0");
-      } else {
-        dialogGame.removeAttribute("href");
-      }
       dialogCover.replaceChildren();
       if (cover) {
         const image = document.createElement("img");
@@ -530,7 +685,7 @@
       displayedState = state;
       if (dialogGameDay && now >= firstOpening + dialogGameDay * dayMs) {
         dialogGame.hidden = true;
-        dialogGame.removeAttribute("href");
+        resetGame();
         dialogGameDay = undefined;
         dialogText.textContent += " Il tempo per giocare è scaduto.";
       }
@@ -539,7 +694,7 @@
       } else {
         status.textContent = available === 0
           ? "La prima casella si aprirà il 1° dicembre alle ore 18:00."
-          : `Gioco disponibile nella casella ${String(available).padStart(2, "0")}. Scade il ${available + 1} dicembre alle 18:00.`;
+          : `Casella ${String(available).padStart(2, "0")} aperta. I minigiochi iniziano alle 18:00.`;
       }
 
       doors.forEach((button, index) => {
@@ -557,7 +712,7 @@
 
     document.querySelector("#preview").addEventListener("click", () => {
       showDialog("Anteprima · Casella di esempio", "Benvenuti al villaggio!",
-        "Apri una casella sbloccata per scoprire la copertina. Nella casella con il gioco attivo, premi Gioca su Telegram e rispondi entro le 18:00 del giorno successivo.");
+        "Apri una casella sbloccata per scoprire la copertina. Alle 18:00 apri i minigiochi e rispondi direttamente qui.");
     });
 
     refresh();
