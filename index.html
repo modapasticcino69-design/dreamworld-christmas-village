@@ -359,7 +359,7 @@
       <div class="info">
         <div>
           <strong>Giochi e classifica</strong>
-          <p>Alle 18:00 iniziano quattro minigiochi. Hai 60 secondi per ciascuno dei primi tre, poi 2 minuti per proporre un’idea e 1 minuto per votare. Per vedere i punteggi, scrivi <code>/classifica</code> al <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
+          <p>I quattro minigiochi sono disponibili dalle 18:00 alle 18:06. Hai 60 secondi per ciascuno dei primi tre, poi 2 minuti per proporre un’idea e 1 minuto per votare. Per vedere i punteggi, scrivi <code>/classifica</code> al <a href="https://t.me/DreamworldChristmas2026Bot" target="_blank" rel="noopener">bot su Telegram</a>.</p>
           <button class="action" id="link-telegram" type="button">Collega Telegram</button>
         </div>
         <button class="action" id="preview" type="button">Prova una casella</button>
@@ -397,6 +397,7 @@
   <script>
     const year = 2026;
     const dayMs = 86400000;
+    const gameDuration = 6 * 60 * 1000;
     const firstOpening = Date.parse("2026-12-01T18:00:00+01:00");
     const closing = Date.parse("2026-12-25T18:00:00+01:00");
     const messages = [
@@ -667,7 +668,7 @@
           showDialog(dateLabel, "Casella chiusa", "Potrai aprirla il " + day + " dicembre alle 18:00.");
           return;
         }
-        const playable = now < firstOpening + day * dayMs;
+        const playable = now < firstOpening + index * dayMs + gameDuration;
         const details = playable ? description : description + " Il tempo per giocare è scaduto.";
         showDialog(dateLabel, cover?.title ?? title, details, cover, playable ? day : undefined);
       });
@@ -680,10 +681,11 @@
     function refresh(now = new Date()) {
       const available = Math.max(0, Math.min(24, Math.floor((now - firstOpening) / dayMs) + 1));
       const closed = now >= closing;
-      const state = `${available}/${closed}`;
+      const playing = available > 0 && now < firstOpening + (available - 1) * dayMs + gameDuration;
+      const state = `${available}/${closed}/${playing}`;
       if (state === displayedState) return;
       displayedState = state;
-      if (dialogGameDay && now >= firstOpening + dialogGameDay * dayMs) {
+      if (dialogGameDay && now >= firstOpening + (dialogGameDay - 1) * dayMs + gameDuration) {
         dialogGame.hidden = true;
         resetGame();
         dialogGameDay = undefined;
@@ -694,12 +696,16 @@
       } else {
         status.textContent = available === 0
           ? "La prima casella si aprirà il 1° dicembre alle ore 18:00."
-          : `Casella ${String(available).padStart(2, "0")} aperta. I minigiochi iniziano alle 18:00.`;
+          : playing
+            ? `Casella ${String(available).padStart(2, "0")} aperta. Puoi giocare fino alle 18:06.`
+            : available < 24
+              ? `I giochi di oggi sono terminati. La prossima casella si aprirà il ${available + 1} dicembre alle 18:00.`
+              : "I minigiochi sono terminati. Le 24 copertine sono disponibili.";
       }
 
       doors.forEach((button, index) => {
         const unlocked = index < available;
-        const current = !closed && index + 1 === available;
+        const current = playing && index + 1 === available;
         const label = current ? "Gioca" : unlocked ? "Copertina" : "Chiusa";
         button.dataset.state = unlocked ? "available" : "locked";
         if (current) button.setAttribute("aria-current", "true");
